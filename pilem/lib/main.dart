@@ -1,8 +1,10 @@
 import 'dart:ui'; // inpot ini agar bisa menggunakan AppScrollBehavior
 
 import 'package:flutter/material.dart';
-
 import 'screens/home_screen.dart';
+
+import 'package:pilem/screens/search_screen.dart';
+import 'package:pilem/screens/favorite_screen.dart';
 
 void main() {
   runApp(const MainApp());
@@ -30,7 +32,59 @@ class MainApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: const HomeScreen(),
+      home: const MainScreen(),
+    );
+  }
+}
+
+class MainScreen extends StatefulWidget {
+  const MainScreen({super.key});
+
+  @override
+  MainScreenState createState() => MainScreenState();
+}
+
+class MainScreenState extends State<MainScreen> {
+  // Index tab yang sedang aktif (0 = Home, 1 = Search, 2 = Favorite)
+  int _currentIndex = 0;
+
+  // Daftar halaman yang bisa ditampilkan
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const SearchScreen(),
+    const FavoriteScreen(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      // Menampilkan halaman sesuai index yang dipilih
+      body: _screens[_currentIndex],
+
+      // Bottom Navigation Bar dengan 3 item
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _currentIndex,
+        onTap: (index) {
+          // Update index saat tab di-tap
+          setState(() {
+            _currentIndex = index;
+          });
+        },
+        items: const [
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.search),
+            label: 'Search',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.favorite),
+            label: 'Favorite',
+          ),
+        ],
+      ),
     );
   }
 }
