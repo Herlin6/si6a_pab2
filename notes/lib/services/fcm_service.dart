@@ -13,8 +13,8 @@ class FcmService {
   final FlutterLocalNotificationsPlugin _localNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
 
-  static const String _baseUrl = 'https://notes-rest-api-livid.vercel.app';
-  static const String _topicName = 'notes';
+  static const String _baseUrl = 'https://notes-rest-api.vercel.app';
+  static const String _topicName = 'notes'; // default topic for notifications
 
   /// Initialize FCM and Local Notifications
   Future<void> initialize() async {
@@ -134,11 +134,13 @@ class FcmService {
 
       // 5. Subscribe to topics (Mobile Only)
       if (!kIsWeb) {
+        // subscribe to topic (notes)
         await _messaging.subscribeToTopic(_topicName).timeout(
               const Duration(seconds: 10),
               onTimeout: () =>
                   debugPrint('Subscription to topic $_topicName timed out'),
             );
+        // subscribe to topic (berita)
         await _messaging.subscribeToTopic('berita').timeout(
               const Duration(seconds: 10),
               onTimeout: () =>
@@ -198,6 +200,34 @@ class FcmService {
       }
     } catch (e) {
       debugPrint('Error sending notification: $e');
+    }
+  }
+
+  /// Subscribe to a specific topic
+  Future<void> subscribeToTopic(String topic) async {
+    if (kIsWeb) {
+      debugPrint('Topic subscription is not supported on Web.');
+      return;
+    }
+    try {
+      await _messaging.subscribeToTopic(topic);
+      debugPrint('Successfully subscribed to topic: $topic');
+    } catch (e) {
+      debugPrint('Error subscribing to topic $topic: $e');
+    }
+  }
+
+  /// Unsubscribe from a specific topic
+  Future<void> unsubscribeFromTopic(String topic) async {
+    if (kIsWeb) {
+      debugPrint('Topic unsubscription is not supported on Web.');
+      return;
+    }
+    try {
+      await _messaging.unsubscribeFromTopic(topic);
+      debugPrint('Successfully unsubscribed from topic: $topic');
+    } catch (e) {
+      debugPrint('Error unsubscribing from topic $topic: $e');
     }
   }
 }

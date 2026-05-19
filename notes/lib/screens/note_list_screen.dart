@@ -9,6 +9,9 @@ import 'package:flutter/services.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import '../services/fcm_service.dart';
 
+// TAMBAHAN IMPORT
+import 'subscribe_screen.dart';
+
 class NoteListScreen extends StatefulWidget {
   const NoteListScreen({super.key});
 
@@ -30,10 +33,12 @@ class _NoteListScreenState extends State<NoteListScreen> {
     if (note != null) {
       try {
         await _noteService.addNote(note);
+
         await _fcmService.sendNoteNotification(
           title: note.title,
           description: note.description,
         );
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -65,6 +70,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
     if (updatedNote != null) {
       try {
         await _noteService.updateNote(updatedNote);
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -91,9 +97,13 @@ class _NoteListScreenState extends State<NoteListScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         title: const Text('Hapus Note'),
-        content: Text('Apakah Anda yakin ingin menghapus "${note.title}"?'),
+        content: Text(
+          'Apakah Anda yakin ingin menghapus "${note.title}"?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -114,6 +124,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
     if (confirm == true && note.id != null) {
       try {
         await _noteService.deleteNote(note.id!);
+
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(
@@ -151,6 +162,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
       'Nov',
       'Dec'
     ];
+
     return '${date.day} ${months[date.month - 1]} ${date.year}, '
         '${date.hour.toString().padLeft(2, '0')}:'
         '${date.minute.toString().padLeft(2, '0')}';
@@ -167,24 +179,49 @@ class _NoteListScreenState extends State<NoteListScreen> {
             Text('My Notes'),
           ],
         ),
+
+        // ACTIONS
         actions: [
+          // TOMBOL SUBSCRIBE
+          IconButton(
+            icon: const Icon(Icons.subscriptions),
+            tooltip: 'Langganan Topik',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => const SubscribeScreen(),
+                ),
+              );
+            },
+          ),
+
+          // TOMBOL COPY TOKEN
           IconButton(
             icon: const Icon(Icons.copy_all),
             tooltip: 'Copy FCM Token',
             onPressed: () async {
               final token = await FirebaseMessaging.instance.getToken();
+
               if (token != null) {
-                await Clipboard.setData(ClipboardData(text: token));
+                await Clipboard.setData(
+                  ClipboardData(text: token),
+                );
+
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('FCM Token copied to clipboard')),
+                    const SnackBar(
+                      content: Text('FCM Token copied to clipboard'),
+                    ),
                   );
                 }
+
                 debugPrint('FCM Token: $token');
               }
             },
           ),
         ],
+
         backgroundColor: Colors.deepPurple,
         foregroundColor: Colors.white,
         elevation: 0,
@@ -205,7 +242,9 @@ class _NoteListScreenState extends State<NoteListScreen> {
           builder: (context, snapshot) {
             // Loading state
             if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
+              return const Center(
+                child: CircularProgressIndicator(),
+              );
             }
 
             // Error state
@@ -214,8 +253,11 @@ class _NoteListScreenState extends State<NoteListScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.error_outline,
-                        size: 64, color: Colors.red.shade300),
+                    Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red.shade300,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Terjadi kesalahan',
@@ -227,7 +269,9 @@ class _NoteListScreenState extends State<NoteListScreen> {
                     const SizedBox(height: 8),
                     Text(
                       '${snapshot.error}',
-                      style: TextStyle(color: Colors.grey.shade500),
+                      style: TextStyle(
+                        color: Colors.grey.shade500,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -296,15 +340,18 @@ class _NoteListScreenState extends State<NoteListScreen> {
     return Card(
       margin: const EdgeInsets.only(bottom: 16),
       elevation: 2,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           // Image (if available)
           if (note.imageBase64 != null && note.imageBase64!.isNotEmpty)
             ClipRRect(
-              borderRadius:
-                  const BorderRadius.vertical(top: Radius.circular(16)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(16),
+              ),
               child: Image.memory(
                 base64Decode(note.imageBase64!),
                 height: 200,
@@ -315,7 +362,10 @@ class _NoteListScreenState extends State<NoteListScreen> {
                     height: 100,
                     color: Colors.grey.shade200,
                     child: const Center(
-                      child: Icon(Icons.broken_image, color: Colors.grey),
+                      child: Icon(
+                        Icons.broken_image,
+                        color: Colors.grey,
+                      ),
                     ),
                   );
                 },
@@ -335,6 +385,7 @@ class _NoteListScreenState extends State<NoteListScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
+
                 const SizedBox(height: 8),
 
                 // Description
@@ -346,9 +397,10 @@ class _NoteListScreenState extends State<NoteListScreen> {
                     height: 1.4,
                   ),
                 ),
+
                 const SizedBox(height: 12),
 
-                // Footer: date + action buttons
+                // Footer
                 Row(
                   children: [
                     Icon(
@@ -356,7 +408,9 @@ class _NoteListScreenState extends State<NoteListScreen> {
                       size: 14,
                       color: Colors.grey.shade400,
                     ),
+
                     const SizedBox(width: 4),
+
                     Text(
                       _formatDate(note.createdAt),
                       style: TextStyle(
@@ -364,22 +418,30 @@ class _NoteListScreenState extends State<NoteListScreen> {
                         color: Colors.grey.shade400,
                       ),
                     ),
+
                     const Spacer(),
+
                     // Edit Button
                     IconButton(
                       onPressed: () => _editNote(note),
-                      icon: const Icon(Icons.edit_outlined),
+                      icon: const Icon(
+                        Icons.edit_outlined,
+                      ),
                       color: Colors.deepPurple,
                       iconSize: 20,
                       tooltip: 'Edit',
                       constraints: const BoxConstraints(),
                       padding: const EdgeInsets.all(8),
                     ),
+
                     const SizedBox(width: 4),
+
                     // Delete Button
                     IconButton(
                       onPressed: () => _deleteNote(note),
-                      icon: const Icon(Icons.delete_outline),
+                      icon: const Icon(
+                        Icons.delete_outline,
+                      ),
                       color: Colors.red,
                       iconSize: 20,
                       tooltip: 'Hapus',
